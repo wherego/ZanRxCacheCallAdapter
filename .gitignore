@@ -45,3 +45,14 @@ build/
 infer-out
 /node_modules
 /retrace_file
+.gitignore
+.idea/
+README.md
+app/
+build.gradle
+gradle.properties
+gradle/
+gradlew
+gradlew.bat
+library/
+settings.gradle
