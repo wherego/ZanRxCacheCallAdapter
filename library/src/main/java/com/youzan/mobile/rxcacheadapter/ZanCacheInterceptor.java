@@ -15,6 +15,7 @@
  */
 package com.youzan.mobile.rxcacheadapter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.youzan.mobile.rxcacheadapter.cache.ZanLocalCache;
@@ -43,10 +44,13 @@ import okhttp3.ResponseBody;
 
 public class ZanCacheInterceptor implements Interceptor {
 
-    private ResponseAvailable mResponseAvailable;
+    private ResponseAvailable responseAvailable;
+    private Context context;
 
-    public ZanCacheInterceptor(@NonNull ResponseAvailable availableCheck) {
-        mResponseAvailable = availableCheck;
+    public ZanCacheInterceptor(@NonNull Context context,
+                               @NonNull ResponseAvailable availableCheck) {
+        this.responseAvailable = availableCheck;
+        this.context = context;
     }
 
     @Override
@@ -54,16 +58,24 @@ public class ZanCacheInterceptor implements Interceptor {
         Request request = chain.request();
         Response response;
 
-        String cache = request.header(Constants.CACHE_HEADER);
-        if (cache != null && cache.equals("cache")) {
+        ZanCacheControl cacheControl;
+        int netwrokState = NetworkUtils.getState(context);
+        switch (netwrokState) {
+            case NetworkUtils.NETWORK_NONE:
+                cacheControl = ZanCacheControl.createOnlyIfCache();
+                break;
+            default:
+                cacheControl = ZanCacheControl.parse(request.headers());
+        }
+        if (cacheControl.isCacheOpen()) {
             Request.Builder reqBuilder = request.newBuilder();
-            reqBuilder.removeHeader(Constants.CACHE_HEADER);
+            reqBuilder.removeHeader(ZanCacheControl.CACHE_HEADER);
             Request newRequest = reqBuilder.build();
 
             Response checkResponse = chain.proceed(newRequest);
             String resStr = checkResponse.body().string();
 
-            if (mResponseAvailable != null && mResponseAvailable.isResponseAvailable(resStr)) {
+            if (responseAvailable != null && responseAvailable.isResponseAvailable(resStr)) {
                 ZanLocalCache.getInstance().put(checkResponse.newBuilder()
                         .body(ResponseBody.create(checkResponse.body().contentType(), resStr))
                         .build());

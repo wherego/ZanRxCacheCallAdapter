@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Square, Inc.
+ * Copyright (C) 2015 ZanMobile, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -468,11 +468,15 @@ public class ZanLocalCache {
         public Response response(DiskLruCache.Snapshot snapshot) {
             String contentType = responseHeaders.get("Content-Type");
             String contentLength = responseHeaders.get("Content-Length");
-            Request cacheRequest = new Request.Builder()
-                    .url(url)
-                    .method(requestMethod, new CacheRequestBody())
-                    .headers(varyHeaders)
-                    .build();
+            Request.Builder builder = new Request.Builder()
+                    .url(url);
+            if (requestMethod.equalsIgnoreCase("GET")) {
+                builder.method(requestMethod, null);
+            } else {
+                builder.method(requestMethod, new CacheRequestBody());
+            }
+            builder.headers(varyHeaders);
+            Request cacheRequest = builder.build();
             return new Response.Builder()
                     .request(cacheRequest)
                     .protocol(protocol)

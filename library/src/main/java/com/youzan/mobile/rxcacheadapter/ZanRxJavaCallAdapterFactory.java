@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Square, Inc.
+ * Copyright (C) 2015 Zan, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,10 +220,11 @@ public final class ZanRxJavaCallAdapterFactory extends CallAdapter.Factory {
 
         @Override public <R> Observable<Response<R>> adapt(Call<R> call) {
             Observable<Response<R>> observable = Observable.create(new CallOnSubscribe<>(call));
-
             Request request = call.request();
-            String isCached = request.header("LocalCache");
-            if (isCached != null && isCached.equals("cache")) {
+
+            ZanCacheControl cacheControl = ZanCacheControl.parse(request.headers());
+            // If request cache open.
+            if (cacheControl.isCacheOpen()) {
                 final okhttp3.Response response = ZanLocalCache.getInstance().get(request);
                 if (response != null) {
                     CacheResponse<R> cacheResponse = new CacheResponse<>(mRetrofit);
@@ -237,15 +238,23 @@ public final class ZanRxJavaCallAdapterFactory extends CallAdapter.Factory {
                                         subscriber.onCompleted();
                                     }
                                 });
-                        if (scheduler != null) {
-                            return Observable.merge(cacheObservable, observable).subscribeOn(scheduler);
+                        // Read cache only.
+                        if (cacheControl.onlyIfCached()) {
+                            if (scheduler != null) {
+                                return cacheObservable.subscribeOn(scheduler);
+                            }
+                            return cacheObservable;
                         }
-                        return Observable.merge(cacheObservable, observable);
+                        // Read cache before retrofit response.
+                        else if (cacheControl.cacheBefore()) {
+                            if (scheduler != null) {
+                                return Observable.merge(cacheObservable, observable).subscribeOn(scheduler);
+                            }
+                            return Observable.merge(cacheObservable, observable);
+                        }
                     }
                 }
             }
-
-
             if (scheduler != null) {
                 return observable.subscribeOn(scheduler);
             }

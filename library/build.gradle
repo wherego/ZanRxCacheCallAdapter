@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 23
@@ -8,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -21,6 +22,15 @@ android {
     }
 }
 
+publish {
+    userOrg = 'chengrui'//bintray.com用户名
+    groupId = 'com.youzan.mobile'//jcenter上的路径
+    artifactId = 'rxcacheadapter'//项目名称
+    publishVersion = '0.1.0'//版本号
+    desc = 'Retrofit RxJava adapter with cache.'//描述，不重要
+    website = 'https://github.com/YouzanMobile/ZanRxCacheCallAdapter'//网站，不重要
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -31,5 +41,4 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'io.reactivex:rxjava:1.1.9'
     compile 'com.jakewharton:disklrucache:2.0.2'
-    // compile 'com.google.code.gson:gson:2.7'
 }
