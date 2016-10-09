@@ -67,7 +67,7 @@ public class ZanCacheInterceptor implements Interceptor {
             default:
                 cacheControl = ZanCacheControl.parse(request.headers());
         }
-        if (cacheControl.isCacheOpen()) {
+        if (cacheControl.isWriteCacheOpen()) {
             Request.Builder reqBuilder = request.newBuilder();
             reqBuilder.removeHeader(ZanCacheControl.CACHE_HEADER);
             Request newRequest = reqBuilder.build();

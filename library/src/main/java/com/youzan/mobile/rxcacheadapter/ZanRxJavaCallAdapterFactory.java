@@ -224,7 +224,7 @@ public final class ZanRxJavaCallAdapterFactory extends CallAdapter.Factory {
 
             ZanCacheControl cacheControl = ZanCacheControl.parse(request.headers());
             // If request cache open.
-            if (cacheControl.isCacheOpen()) {
+            if (cacheControl.isReadCacheOpen()) {
                 final okhttp3.Response response = ZanLocalCache.getInstance().get(request);
                 if (response != null) {
                     CacheResponse<R> cacheResponse = new CacheResponse<>(mRetrofit);

@@ -24,7 +24,7 @@ import okhttp3.internal.http.HeaderParser;
 
 public class ZanCacheControl {
 
-    public static String CACHE_HEADER = "ZanCache-Control";
+    public static String CACHE_HEADER = "ZanCache";
 
     String headerValue; // Lazily computed, null if absent.
 
@@ -32,26 +32,32 @@ public class ZanCacheControl {
     private final int maxAgeSeconds;
     private final boolean onlyIfCached;
     private final boolean cacheBefore;
+    private final boolean refreshCache;
 
     private ZanCacheControl(boolean noCache, int maxAgeSeconds, boolean onlyIfCached,
-                            boolean cacheBefore, String headerValue) {
+                            boolean cacheBefore, boolean refreshCache, String headerValue) {
         this.noCache = noCache;
         this.maxAgeSeconds = maxAgeSeconds;
         this.onlyIfCached = onlyIfCached;
         this.headerValue = headerValue;
         this.cacheBefore = cacheBefore;
+        this.refreshCache = refreshCache;
     }
 
     public static ZanCacheControl createOnlyIfCache() {
-        return new ZanCacheControl(false, 0, true, false, "only-if-cached");
+        return new ZanCacheControl(false, 0, true, false, false, "only-if-cached");
     }
 
     public static ZanCacheControl createNoCache() {
-        return new ZanCacheControl(true, 0, false, false, "no-cache");
+        return new ZanCacheControl(true, 0, false, false, false, "no-cache");
     }
 
     public static ZanCacheControl createCacheBefore() {
-        return new ZanCacheControl(true, 0, false, false, "cache-before");
+        return new ZanCacheControl(true, 0, false, false, false, "cache-before");
+    }
+
+    public static ZanCacheControl createRefreshCache() {
+        return new ZanCacheControl(false, 0, false, false, true, "refresh_cache");
     }
 
     public boolean noCache() {
@@ -70,8 +76,16 @@ public class ZanCacheControl {
         return cacheBefore;
     }
 
-    public boolean isCacheOpen() {
-        return cacheBefore;
+    public boolean isWriteCacheOpen() {
+        return cacheBefore || refreshCache;
+    }
+
+    public boolean isReadCacheOpen() {
+        return cacheBefore || onlyIfCached;
+    }
+
+    public boolean refreshCache() {
+        return refreshCache;
     }
 
     public static ZanCacheControl parse(Headers headers) {
@@ -81,6 +95,7 @@ public class ZanCacheControl {
         boolean cacheBefore = false;
         String headerValue = null;
         boolean canUseHeaderValue = true;
+        boolean refreshCache = false;
 
         for (int i = 0, size = headers.size(); i < size; i++) {
             String name = headers.name(i);
@@ -133,13 +148,15 @@ public class ZanCacheControl {
                     onlyIfCached = true;
                 } else if ("cache-before".equals(directive)) {
                     cacheBefore = true;
+                } else if ("refresh_cache".equals(directive)) {
+                    refreshCache = true;
                 }
             }
         }
         if (!canUseHeaderValue) {
             headerValue = null;
         }
-        return new ZanCacheControl(noCache, maxAgeSeconds, onlyIfCached, cacheBefore, headerValue);
+        return new ZanCacheControl(noCache, maxAgeSeconds, onlyIfCached, cacheBefore, refreshCache, headerValue);
     }
 
 }
