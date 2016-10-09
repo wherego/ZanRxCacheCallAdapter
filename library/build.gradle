@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion 23
@@ -22,23 +23,83 @@ android {
     }
 }
 
-publish {
-    userOrg = 'chengrui'//bintray.com用户名
-    groupId = 'com.youzan.mobile'//jcenter上的路径
-    artifactId = 'rxcacheadapter'//项目名称
-    publishVersion = '0.1.0'//版本号
-    desc = 'Retrofit RxJava adapter with cache.'//描述，不重要
-    website = 'https://github.com/YouzanMobile/ZanRxCacheCallAdapter'//网站，不重要
+def siteUrl = "https://github.com/YouzanMobile/ZanRxCacheCallAdapter"
+def gitUrl = "https://github.com/YouzanMobile/ZanRxCacheCallAdapter.git"
+group = "com.youzan"
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                // Add your description here
+                name 'ZanRxCacheCallAdapter - Retrofit RxJava adapter with cache'
+                url siteUrl
+
+                // Set your license
+                licenses {
+                    license {
+                        name 'MIT'
+                        url 'https://github.com/YouzanMobile/ZanRxCacheCallAdapter/blob/master/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'lyndonchin'
+                        name 'liangfei'
+                        email 'njliangfei@gmail.com'
+                    }
+                }
+
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
 }
 
-dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    testCompile 'junit:junit:4.12'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'io.reactivex:rxjava:1.1.9'
-    compile 'com.jakewharton:disklrucache:2.0.2'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    // archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+
+    pkg {
+        repo = "maven"
+        name = "titan-recyclerview"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["MIT"]
+        publish = true
+    }
 }
