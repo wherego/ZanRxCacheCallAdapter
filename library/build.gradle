@@ -11,10 +11,12 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "0.1.0"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -23,83 +25,31 @@ android {
     }
 }
 
-def siteUrl = "https://github.com/YouzanMobile/ZanRxCacheCallAdapter"
-def gitUrl = "https://github.com/YouzanMobile/ZanRxCacheCallAdapter.git"
-group = "com.youzan"
+dependencies {
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'io.reactivex:rxjava:1.1.9'
+    compile 'com.jakewharton:disklrucache:2.0.2'
+}
 
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
+apply from: "bintray.gradle"
 
-                // Add your description here
-                name 'ZanRxCacheCallAdapter - Retrofit RxJava adapter with cache'
-                url siteUrl
-
-                // Set your license
-                licenses {
-                    license {
-                        name 'MIT'
-                        url 'https://github.com/YouzanMobile/ZanRxCacheCallAdapter/blob/master/LICENSE'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'lyndonchin'
-                        name 'liangfei'
-                        email 'njliangfei@gmail.com'
-                    }
-                }
-
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-                }
+/*
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            snapshotRepository(url: 'http://maven.qima-inc.com/content/repositories/snapshots/') {
+                authentication(userName: 'snapshot', password: 'snapshot')
             }
+
+            repository(url: 'http://maven.qima-inc.com/content/repositories/releases/') {
+                authentication(userName: 'username', password: 'password')
+            }
+            pom.packaging = 'aar'
+            pom.version = '0.1.0-SNAPSHOT'
+            pom.groupId = 'com.youzan.mobile'
+            pom.artifactId = "zan-rxadapter"
         }
     }
 }
-
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    // archives javadocJar
-    archives sourcesJar
-}
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-
-    pkg {
-        repo = "maven"
-        name = "titan-recyclerview"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["MIT"]
-        publish = true
-    }
-}
+*/g

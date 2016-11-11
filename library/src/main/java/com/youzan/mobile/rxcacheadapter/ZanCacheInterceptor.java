@@ -16,7 +16,6 @@
 package com.youzan.mobile.rxcacheadapter;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.youzan.mobile.rxcacheadapter.cache.ZanLocalCache;
 
@@ -47,8 +46,7 @@ public class ZanCacheInterceptor implements Interceptor {
     private ResponseAvailable responseAvailable;
     private Context context;
 
-    public ZanCacheInterceptor(@NonNull Context context,
-                               @NonNull ResponseAvailable availableCheck) {
+    public ZanCacheInterceptor(Context context, ResponseAvailable availableCheck) {
         this.responseAvailable = availableCheck;
         this.context = context;
     }
